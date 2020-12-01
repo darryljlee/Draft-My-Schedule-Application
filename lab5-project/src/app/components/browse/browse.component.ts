@@ -38,10 +38,7 @@ export class BrowseComponent implements OnInit {
 
 
   submitResults():void{
-    
     var existingDiv = document.getElementById("searchResults")
-   // existingDiv.innerHTML = "";
-   // existingDiv.setAttribute("class", "message");
     var subjectChoice = (<HTMLInputElement>document.getElementById("Subject")).value; //create a variable that will link the subject choice to submit button  
     var numberChoice = (<HTMLInputElement>document.getElementById("numberInput")).value;
     var componentChoice = (<HTMLInputElement>document.getElementById("Component")).value;
@@ -52,12 +49,12 @@ export class BrowseComponent implements OnInit {
     this.courses = data;  //refers to array of type any
   
    //else if only a course number is entered, alert appears
-  if(subjectChoice=="ALL SUBJECTS" && numberChoice!="" && componentChoice=="AllComponent"){
-    alert("Please don't enter just a course number only")
-  }
+  // if(subjectChoice=="ALL SUBJECTS" && numberChoice!="" && componentChoice=="AllComponent"){
+  //   alert("Please don't enter just a course number only")
+  // }
   
   //else if only a component is entered, alert appears
-  else if(subjectChoice=="ALL SUBJECTS" && numberChoice=="" && componentChoice!="AllComponent"){
+  if(subjectChoice=="ALL SUBJECTS" && numberChoice=="" && componentChoice!="AllComponent"){
     alert("Please don't enter just a component only")
   }
   })}

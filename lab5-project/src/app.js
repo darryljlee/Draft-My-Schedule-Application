@@ -27,9 +27,15 @@ const allUserInfo = low(adapter_1)
 allUserInfo.defaults({ all_users: [] }).write()
 app.use(cors());
 
+const ADMIN_TOKEN = "XjQ61FvPkqnaqQ3p3raz";
+const ACCESS_TOKEN = "n9rhIUzmXzQK08Nao8dZ";
+const REFRESH_TOKEN_SECRET = "SXSPh7lRk9gkURwZ1xiS";
+
+
+
 
 var storage = [];
-app.post('/login', (req,res) => {
+app.post('/login', async(req,res) => {
 const loginEmail = req.body.email;
 const loginPassword = req.body.password;
 
@@ -47,7 +53,6 @@ const adminEmail = "scheduleAdmin@uwo.ca"
 const adminPassword = "lab5"
 
 if(loginEmail == adminEmail && loginPassword==adminPassword){
-
     let loggedIn = {
         loginEmail, 
         loginPassword,
@@ -60,7 +65,7 @@ if(loginEmail == adminEmail && loginPassword==adminPassword){
         Tokens.get('tokens').push({adminRefreshToken: adminRefreshToken}).write()
         return res.send({
             accessToken: adminToken,
-            refreshToken: adminRefreshToken,
+            REFRESH_TOKEN_SECRET: adminRefreshToken,
             username: loggedIn.username,
             message:"You are an administrator"
         })
@@ -157,25 +162,17 @@ function validateIncomingEmail(incomingEmail) {
 }
 
 
+function generateAdministratorAccessToken(loggedIn){
+    return jwt.sign(loggedIn, ADMIN_TOKEN, {expiresIn: '20m'})
+}
 
 //generate tokens
-function generateAccessToken(user){
-    return jwt.sign(user, ACCESS_TOKEN, {expiresIn:'20m'})
+function generateAccessToken(loggedIn){
+    return jwt.sign(loggedIn, ACCESS_TOKEN, {expiresIn:'20m'})
 }
 
-function generateAdministratorAccessToken(user){
-    return jwt.sign(req.body.email, ADMIN_TOKEN, {expiresIn: '20m'})
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
-
 
 
 

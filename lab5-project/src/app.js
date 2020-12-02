@@ -1,12 +1,12 @@
 const express = require('express'); //creates an express app
 const app = express();              // start an express app
 const port = 3000;
+app.use(express.json());
 const low = require('lowdb')
 const data = require("./Lab3-timetable-data.json");
 app.use(express.static('dist/angular-lab4')); 
 const FileSync = require('lowdb/adapters/FileSync')
-const joi = require('joi') //impor joi dependency
-app.use(express.json());
+const joi = require('joi') 
 const adapter = new FileSync('db.json')
 const db = low(adapter)
 const specialChars = /^[^<>:/?#@!&;]*$/;
@@ -14,154 +14,110 @@ var cors = require('cors')
 var bodyParser = require('body-parser')
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
+const adaptToken = new FileSync ('tokens.json') 
+const Tokens = low(adaptToken)
+Tokens.defaults({tokens:[]}).write()
+require('dotenv').config()
+const jwt = require('jsonwebtoken')
 
-//const adaptToken = new Filesync ('tokens.json')
 
-/////////////////////////////////////////////////////////////////
 const encrypt = require('bcrypt') //declare encrypthing thing
 const adapter_1 = new FileSync('allUserInfo.json')
 const allUserInfo = low(adapter_1)
 allUserInfo.defaults({ all_users: [] }).write()
 app.use(cors());
 
-/*Anything in between these big lines is for lab 5 login */
-/////////////////////////////////////////////////////////////////////////// 
-require('dotenv').config()
-const jwt = require('jsonwebtoken')
-app.use(express.json()); 
 
-// app.get('/posts', authenticateToken, (req,res)=> {
-//     res.json(posts.filter(post => post.username == req.user.name)) 
-// })
-// var storage = [];
-// app.put('/login', (req,res) => {
-// const email1 = req.body.email;
-// const password1 = req.body.password;
+var storage = [];
+app.post('/login', (req,res) => {
+const loginEmail = req.body.email;
+const loginPassword = req.body.password;
 
-// if(!email1||!password1){
-//     return res.send({message: "You didn't fill out all forms"})
-// }
+if(!loginEmail||!loginPassword){
+    return res.send({message: "You didn't fill out all forms"})
+}
 
-// const userProfile = {
-//     email:email1,
-//     password: password1
-//   }
-// const storage1 = allUserInfo.get('all_users').find({email:email1}).value()
-// const storage2 = allUserInfo.get('all_users').find({password:password1}).value()
+const resultValidation = validateIncomingEmail(loginEmail);
 
-// console.log(storage1)
+if (resultValidation == null){
+    return res.send({message: "Invalid email"});
+}
 
-// if(storage1 != undefined && storage2 != undefined){
-// res.send(storage1)
-// }
-// //if passwords match, send a message that you are given permission. Inside I'd need to check token info. Check if email is ACTIVE
-// //check email, check matching passwords, then check jwt
+const adminEmail = "scheduleAdmin@uwo.ca"
+const adminPassword = "lab5"
 
-// const resultValidation = validateIncomingEmail(email1);
+if(loginEmail == adminEmail && loginPassword==adminPassword){
 
-// if (resultValidation.error){
-//     return res.send({message: "Invalid email"});
-// }
+    let loggedIn = {
+        loginEmail, 
+        loginPassword,
+        username:"Administrator"
+    }
 
-// const adminEmail = "scheduleAdmin@uwo.ca"
-// const adminPassword = "lab5"
+    try{
+        const adminToken = generateAdministratorAccessToken(loggedIn);
+        const adminRefreshToken = jwt.sign(loggedIn, ADMIN_TOKEN);
+        Tokens.get('tokens').push({adminRefreshToken: adminRefreshToken}).write()
+        return res.send({
+            accessToken: adminToken,
+            refreshToken: adminRefreshToken,
+            username: loggedIn.username,
+            message:"You are an administrator"
+        })
+    }
+    catch {
+        return res.send({
+            message: "Unable to login"
+        })
+    }
+}
 
-// if(email1 == adminEmail && password1==adminPassword){
+const userLogin = allUserInfo.get('all_users').find({email: loginEmail}).value();
 
-//     let user = {
-//         email, 
-//         password,
-//         username:"Administrator"
-//     }
+if(userLogin == null){
+    return res.send({
+        message: "email not found"
+    })
+}
+else if (userLogin.verification != "Active"){
+    return res.send({message:"Account inactive, contact support admin"})
+}
 
-//     try{
-//         const adminToken = generateAdminToken(user);
-//         const adminRefreshToken = jwt.sign(user, ADMIN_TOKEN_SECRET);
-//         adaptToken.get('tokens').push({adminRefreshToken: adminRefreshToken})
-//         return res.send({
-//             accessToken: adminAccessToken,
-//             refreshToken: adminRefreshToken,
-//             username: user.username,
-//             message:"You are an administrator"
-//         })
-//     }
-//     catch {
-//         return res.send({
-//             message: "Unable to login"
-//         })
-//     }
-// }
+//////////////////Pick up here after dinner
+    encrypt.compare(loginPassword, userLogin.password, function(err, comparison){
+        if(!err){
+            if(comparison){
+                const accessToken = generateAccessToken(userLogin);
+                const refreshToken = jwt.sign(userLogin,REFRESH_TOKEN_SECRET);
+                Tokens.get('tokens').push({REFRESH_TOKEN_SECRET: refreshToken}).write();
+                res.send({
+                    accessToken:accessToken,
+                    refreshingToken:refreshToken,
+                    username:userLogin.username,
+                    message:"you have been logged in"
+                })
+            }
+            else{
+                return res.send({
+                    message: "Incorrect password"
+                })
+            }
+        }
+        else{
+            return res.send({
+                message:"sorry, unable to login"
+            })
+        }
+    }    
+)
+})
 
-// const user = user_db.get('all_users').find({email: email1}).value();
 
-// if(user == null){
-//     return res.send({
-//         message: "email not found"
-//     })
-// }
-// else if (user.verification != "Active"){
-//     return res.send({message:"Account inactive, contact support admin"})
-// }
 
-// try{
-//     if(await bcrypt.compare(password. user.password)){
-//         const accessToken = generateAccessToken(user);
-//         const refreshToken = jwt.sign(user,REFRESH_TOKEN_SECRET);
-//         adaptToken.get('tokens').push({refreshToken: refreshToken}).write();
-//         res.send({
-//             accessToken:accessToken,
-//             refreshToken:refreshToken,
-//             username:user.username
-//         })
-//     }
-//     else{
-//         return res.send({
-//             message: "Incorrect password"
-//         })
-//     }
-// }
-// catch {
-//     return res.send({
-//         message:"sorry, unable to login"
-//     })
-// }
-
-// // const username = req.body.username;
-// // const user = {name: username}
-// // const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET);
-// // res.json({accessToken:accessToken})
-
-// })
-
-// function generateAccessToken(user){
-//     return jwt.sign(user, ACCESS_TOKEN_SECRET, {expiresIn:'20m'})
-// }
-
-// function generateAdministratorAccessToken(user){
-//     return jwt.sign(user, ADMIN_TOKEN_SECRET, {expiresIn: '20m'})
-// }
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////very dangerous ^^^
-// function authenticateToken(req,res,next){
-// const authHeader = req.headers['authorization']
-// const token = authHeader && authHeader.split(' ')[1] //return token as undefined or the actual token
-// if (token == null){
-// return res.sendStatus(401);
-// }
-// jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err,user) => {
-//     if(err){
-//         return res.sendStatus(403); //"we see you have a token, but you no longer have access"
-//     }
-//     req.user = user;
-//     next();
-
-// })
-// }
-
+//register lab 5
 app.post('/registeruser', async(req,res) => {
 const hasher = await encrypt.genSalt();
 const protectedPassword = await encrypt.hash(req.body.password, hasher); //hash the unprotected password received from body with req.body.password
-
 
 const model = { //pass sensitive info into body 
     username: req.body.username,
@@ -171,27 +127,22 @@ const model = { //pass sensitive info into body
 }
 //checkEmail = req.body.email;
 if(allUserInfo.get('all_users').find({email: req.body.email}).value()){
-return res.status(400).send({message:"This email is already registered"});
+res.send({message:"This email is already registered"});
+return;
 }
 else{
     if(validateIncomingEmail(req.body.email)){
         allUserInfo.get('all_users').push(model).write()
-        res.status(200).send({message:"Account is created!"})
+        res.send({message:"Account is created!"})
         return;
     }
     else{
-        res.status(400).send({message:"Invalid email"})
+        res.send({message:"Invalid email"})
         return;
     }
-     
 }
 })
-
-function validateIncomingEmail(incomingEmail) {
-    const symbols = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return incomingEmail.match(symbols);
-}
-
+//verification
 storeVerification = [];
 app.put('/verification', (req,res)=> {
 //verifyEmail = req.body.email;
@@ -199,7 +150,34 @@ storeVerification = allUserInfo.get('all_users').find({email: req.body.email}).a
 res.status(200).send({message:"This email is verified"})
 })
 
+//validation
+function validateIncomingEmail(incomingEmail) {
+    const symbols = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return incomingEmail.match(symbols);
+}
+
+
+
+//generate tokens
+function generateAccessToken(user){
+    return jwt.sign(user, ACCESS_TOKEN, {expiresIn:'20m'})
+}
+
+function generateAdministratorAccessToken(user){
+    return jwt.sign(req.body.email, ADMIN_TOKEN, {expiresIn: '20m'})
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
 
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');

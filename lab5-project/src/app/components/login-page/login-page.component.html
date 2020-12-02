@@ -1,0 +1,11 @@
+<h3>Login to Draft My Schedule</h3>
+
+<label for="email">Email:  </label>
+<input [(ngModel)]="email" name="email" type="email" id="email"  required>
+<br>
+<br>
+<label for="password">Password:  </label>
+<input [(ngModel)]="password" name="password" id="password" type="text">
+<br>
+<br>
+<button (click) ="login()" id="login"type="button" >Log In</button>

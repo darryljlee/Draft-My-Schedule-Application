@@ -189,10 +189,10 @@ app.put('/api/reactivate' , (req,res) => {
     reactivate = req.body.email;
     reactivateUser = allUserInfo.get('all_users').find({email:reactivate}).assign({verification: "Active"}).write();
     res.send({message: "Reactivated"})
-    })
+})
 
 
- app.get('/checkkeywords', (req,res) => {
+app.get('/checkkeywords', (req,res) => {
         key = req.query.key.toUpperCase();
         let words = [];
         for (i=0; i<data.length;i++){
@@ -210,9 +210,18 @@ app.put('/api/reactivate' , (req,res) => {
         else{
             res.send(words)
         }
-        })
+})
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+app.get('/showallusers', (req,res) => {
+    let userStorage = [];
+    userStorage = allUserInfo.get('all_users').value();
+    res.send(userStorage);
+}
+)
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 

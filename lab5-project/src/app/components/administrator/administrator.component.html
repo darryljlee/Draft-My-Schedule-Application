@@ -1,0 +1,26 @@
+<h2>Administrator Page</h2>
+
+
+
+<p>Choose an option below to do an operation.</p>
+
+<div id="subject" class="subject">
+    <form>
+        <label for="usersdropdown">Users:</label>
+        <select name="usersdropdown" id="usersdropdown">
+        <option value="ALL USERS">All Users</option>
+
+        </select>
+        <br><br>
+
+        <button type="button"  (click)="submitResults()">Deactivate User</button> <!--DONT CHANGE THIS YOU WILL HAVE PROBLEMS-->
+        <br>
+        <br>
+        <label for="keyword">By Keyword</label>
+        <input name="keyword" id="keyword" type="text">
+        <br>
+        <br>
+        <button id="keywordsubmit" type="button"  (click)="searchByKeyword()">Search by Keyword</button> <!--DONT CHANGE THIS YOU WILL HAVE PROBLEMS-->
+
+      </form>
+</div>       

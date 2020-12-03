@@ -10,17 +10,20 @@ import {Router} from '@angular/router';
   styleUrls: ['./login-page.component.css']
 })
 export class LoginPageComponent implements OnInit {
+  username!:String;
   email!: String;
   password!: String;
-  url = "http://localhost:3000/"
+  verification!:String;
   constructor(private http:HttpClient, private route: Router) { }
+  showVerifyButton:boolean = false;
+
 
   login():void{
     var accountInfo = {
       email: this.email,
       password: this.password
     }
-    this.http.post<any>(this.url+'login', accountInfo).subscribe(data=> {
+    this.http.post<any>('http://localhost:3000/login', accountInfo).subscribe(data=> {
       console.log(data)
       if(data.message=="You didn't fill out all forms"){
         alert("You didn't fill out all forms")
@@ -37,6 +40,7 @@ export class LoginPageComponent implements OnInit {
       }
       else if(data.message=="Account inactive, contact support admin"){
         alert("Account inactive, contact support admin")
+        this.showVerifyButton = true;
       }
       else if(data.message=="Incorrect password"){
         alert("Incorrect password")
@@ -60,6 +64,20 @@ export class LoginPageComponent implements OnInit {
         alert("Your account has been deactivated")
       }
       */
+    })
+  }
+
+  verifiedEmail(){
+    var verifiedInfo = {
+      username:this.username,
+      email:this.email,
+      password: this.password,
+      verification: this.verification
+    }
+    this.http.put<any>("http://localhost:3000/verification", verifiedInfo).subscribe (data => {
+      if(data.message == "This email is verified"){
+        this.route.navigate(['/verified-email'])
+      }
     })
   }
 

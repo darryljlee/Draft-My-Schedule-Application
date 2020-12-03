@@ -5,7 +5,14 @@
 <br>
 <br>
 <label for="password">Password:  </label>
-<input [(ngModel)]="password" name="password" id="password" type="text">
+<input [(ngModel)]="password" name="password" id="password" type="password">
 <br>
 <br>
 <button (click) ="login()" id="login"type="button" >Log In</button>
+<br>
+<button *ngIf = "showVerifyButton" (click)="verifiedEmail()">Click this button to verify email</button>
+
+<br>
+<button>
+<a routerLink="/createaccount" routerLinkActive="active">Not registered? Create an account here.</a>
+</button>

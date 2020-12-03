@@ -184,6 +184,11 @@ deactivateUser = allUserInfo.get('all_users').find({email:deactivate}).assign({v
 res.send({message: "Deactivated"})
 })
 //reactivate user
+app.put('/api/reactivate' , (req,res) => {
+    reactivate = req.body.email;
+    reactivateUser = allUserInfo.get('all_users').find({email:reactivate}).assign({verification: "Active"}).write();
+    res.send({message: "Reactivated"})
+    })
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////

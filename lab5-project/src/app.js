@@ -43,6 +43,7 @@ if(!loginEmail||!loginPassword){
     return res.send({message: "You didn't fill out all forms"})
 }
 
+
 const resultValidation = validateIncomingEmail(loginEmail);
 
 if (resultValidation == null){
@@ -84,8 +85,11 @@ if(userLogin == null){
         message: "email not found"
     })
 }
-else if (userLogin.verification != "Active"){
+else if (userLogin.verification == "Inactive"){
     return res.send({message:"Account inactive, contact support admin"})
+}
+else if(userLogin.verification == "Deactivated"){
+    return res.send({message: "Your account has been deactivated"})
 }
 
 //////////////////Pick up here after dinner
@@ -128,9 +132,10 @@ const model = { //pass sensitive info into body
     username: req.body.username,
     email: req.body.email,
     password: protectedPassword,
-    verification: req.body.verification
+    //verification: req.body.verification
+    verification: "Inactive"
 }
-//checkEmail = req.body.email;
+
 if(allUserInfo.get('all_users').find({email: req.body.email}).value()){
 res.send({message:"This email is already registered"});
 return;
@@ -170,6 +175,15 @@ function generateAdministratorAccessToken(loggedIn){
 function generateAccessToken(loggedIn){
     return jwt.sign(loggedIn, ACCESS_TOKEN, {expiresIn:'20m'})
 }
+
+
+//deactivate user
+app.put('/api/deactivate' , (req,res) => {
+deactivate = req.body.email;
+deactivateUser = allUserInfo.get('all_users').find({email:deactivate}).assign({verification: "Deactivated"}).write();
+res.send({message: "Deactivated"})
+})
+//reactivate user
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -215,7 +229,7 @@ app.get('/api/courses/search/:subjectCode' , (req,res) => {
         }
     }
     if(returnedArray.length <= 0){
-        res.status(404).send("couldn't find matching searches for your subject code")
+        res.send("couldn't find matching searches for your subject code")
     }
     else{
         res.send(returnedArray);
@@ -232,7 +246,7 @@ app.get('/api/courses/searchnum/:catalognum' , (req,res) => {
         }
     }
     if(numArray.length <= 0){
-        res.status(404).send("couldn't find matching searches for your catalog number")
+        res.send("couldn't find matching searches for your catalog number")
     }
     else{
         res.send(numArray);
@@ -252,7 +266,7 @@ app.get('/api/courses/search/:subjectCode/:catalognum' , (req,res) => {
     const withComponentResult = constWithComponent.validate(req.query);
 
     if(resultValid.error && withComponentResult.error){
-        res.status(400).send({message: "Bad query."})
+        res.send({message: "Bad query."})
         return;
     }
     const getSubject = req.params.subjectCode; 
@@ -360,14 +374,14 @@ app.put('/api/schedules/updateCourse', (req,res) => {
         }
         }
         if(duplicate){
-            res.status(400).send("You've already added this course");
+            res.send("You've already added this course");
             return;
         }
         schedules.listOfCourses.push({"subject":subject,"catalog_nbr":courseNumber} ); 
         db.set({schedules: schedules}).write(); //update the subject-course pairs in the selected schedule
         res.send("Course is added");
       } else {
-        res.status(404).send("400 error"); //if a schedule that doesn't exist is trying to be updated, send back this error
+        res.send("400 error"); //if a schedule that doesn't exist is trying to be updated, send back this error
       }
 }
 )
@@ -381,7 +395,7 @@ app.get('/api/schedules/getSchedule' ,  (req,res) => {
 
     const resultValid = schema.validate(req.query);
     if(resultValid.error){
-        res.status(400).send({message: "Bad request."})
+        res.send({message: "Bad request."})
         return;
     }
 
@@ -392,7 +406,7 @@ app.get('/api/schedules/getSchedule' ,  (req,res) => {
         res.send(schedules.listOfCourses); 
     }
     else{
-        res.status(404).send({message: "Cannot find the specified schedule."})
+        res.send({message: "Cannot find the specified schedule."})
     }
 }
 )

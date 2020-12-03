@@ -52,6 +52,14 @@ export class LoginPageComponent implements OnInit {
         localStorage.timetabletoken = data.accessToken;
         this.route.navigate(['/createschedule'])
       }
+      else if(data.message=="Your account has been deactivated"){
+        alert("Your account has been deactivated. Please contact support admin at scheduleAdmin@uwo.ca. ")
+      }
+      /*
+      else if(data.message=="Your account has been deactivated"){ //reactivating account, leave here for now.
+        alert("Your account has been deactivated")
+      }
+      */
     })
   }
 

@@ -58,6 +58,39 @@ export class BrowseComponent implements OnInit {
     alert("Please don't enter just a component only")
   }
   })}
+
+  searchByKeyword(){
+    var keywordInput = (<HTMLInputElement>document.getElementById("keyword")).value;
+    var keywordQuery = '/checkkeywords?key='+keywordInput;
+    this.http.get<any>("http://localhost:3000"+keywordQuery).subscribe(data => {
+      if(data.length == undefined){
+        alert(data.message);
+        return;
+      }
+      this.courses=data;
+    })
+  }
+
+  keyworddetails(subject:String, catalog_nbr:String){
+    this.http.get<any>("http://localhost:3000/api/courses/search/"+subject+"/"+catalog_nbr).subscribe(data => {
+    let displayedKeywordString = "";       //Alert string to be displayed
+
+    displayedKeywordString += data.subject + " " + data.catalog_nbr + "\r\n";
+    for(let i = 0; i < data.course_info.length; i++) {
+      displayedKeywordString += data.course_info[i].class_nbr + "\r\n";
+      displayedKeywordString += data.course_info[i].facility_ID + "\r\n";
+      displayedKeywordString += data.course_info[i].campus + "\r\n";
+      displayedKeywordString += data.course_info[i].facility_ID + "\r\n";
+      displayedKeywordString += data.course_info[i].descr + "\r\n";
+      displayedKeywordString += data.course_info[i].instructors + "\r\n";
+      displayedKeywordString += data.course_info[i].class_nbr + "\r\n";
+      displayedKeywordString += data.course_info[i].enrl_stat + "\r\n";
+      displayedKeywordString += data.catalog_description + "\r\n";
+    }
+    alert(displayedKeywordString);   //Display the course's details
+    
+    })
+  }
   
   ngOnInit(): void {
     /*The following get request is used to get all the subject names to populate the form for Subject, and to remove duplicates when
@@ -97,3 +130,5 @@ export class BrowseComponent implements OnInit {
     })
   }
 }
+
+

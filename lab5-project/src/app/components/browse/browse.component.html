@@ -1,0 +1,81 @@
+
+      
+  <nav>
+    <a routerLink="/home" routerLinkActive="active">Home</a>
+    <a routerLink="/browse" routerLinkActive="active">Browse</a>
+    <a routerLink="/createaccount" routerLinkActive="active">Create Account</a>    
+  
+</nav>
+<br>
+        <div id="subject" class="subject">
+            <form>
+                <label for="Subject">Subject:</label>
+                <select name="Subject" id="Subject">
+                <option value="ALL SUBJECTS">All Subjects</option>
+
+                </select>
+                <br><br>
+              
+                <label for="CourseNumber">Course Number:</label>
+                <input name="CourseNumber" id="numberInput" type="text" maxlength="5">
+                <br><br>
+              
+                <label for="Component">Component:</label>
+                <select name="Component" id="Component"> 
+                <option value = "AllComponent"> All Components</option>
+                <option value = "LEC">Lecture</option>
+                <option value = "LAB">Lab</option>
+                <option value = "TUT">Tutorial</option>
+                </select>
+                
+                <br><br>
+
+                <button type="button"  (click)="submitResults()">Submit</button> <!--DONT CHANGE THIS YOU WILL HAVE PROBLEMS-->
+                <br>
+                <br>
+                <label for="keyword">By Keyword</label>
+                <input name="keyword" id="keyword" type="text">
+                <br>
+                <br>
+                <button id="keywordsubmit" type="button"  (click)="searchByKeyword()">Search by Keyword</button> <!--DONT CHANGE THIS YOU WILL HAVE PROBLEMS-->
+
+              </form>
+        </div>       
+        
+        <div id=searchResults>
+          <!-- create a div for each course, let course of courses is arbitrary-->
+        </div>
+
+        <div *ngFor= "let course of courses">           <!-- Makes for loop and for each course, it will create a div-->
+          <h2>{{course.subject}}</h2>
+          <h2>{{ course.className }}</h2>
+          <h2>{{course.catalog_nbr}}</h2>
+
+          <button class="keyworddetails" (click)="keyworddetails(course.subject, course.catalog_nbr)">Expand</button>
+
+         
+          <table>
+            <tr>
+                <th>Section</th>
+                <th>Component</th>
+                <th>Class Number</th>
+               
+                <th>Days</th>
+                <th>Time</th>
+            
+
+
+              </tr>
+              <tr>
+                <td>{{ course.course_info[0].class_section }}</td>
+                <td class="{{ course.course_info[0].ssr_component }}">{{ course.course_info[0].ssr_component }}</td>
+                <td>{{ course.course_info[0].class_nbr }}</td>
+                <td>{{ course.course_info[0].days }}</td>
+                <td>{{ course.course_info[0].start_time }} to {{course.course_info[0].end_time}}</td>
+              </tr>
+          </table>
+       </div>
+        
+   
+
+

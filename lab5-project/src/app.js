@@ -26,6 +26,7 @@ const adapter_1 = new FileSync('allUserInfo.json')
 const allUserInfo = low(adapter_1)
 allUserInfo.defaults({ all_users: [] }).write()
 app.use(cors());
+const similarity = require('string-similarity')
 
 const ADMIN_TOKEN = "XjQ61FvPkqnaqQ3p3raz";
 const ACCESS_TOKEN = "n9rhIUzmXzQK08Nao8dZ";
@@ -190,6 +191,26 @@ app.put('/api/reactivate' , (req,res) => {
     res.send({message: "Reactivated"})
     })
 
+
+ app.get('/checkkeywords', (req,res) => {
+        key = req.query.key.toUpperCase();
+        let words = [];
+        for (i=0; i<data.length;i++){
+            let idName = data[i].className;
+            let catalog = data[i].catalog_nbr.toString();
+            let wordComparison = similarity.compareTwoStrings(idName, key);
+            let compareCatalog = similarity.compareTwoStrings(catalog, key);
+            if(wordComparison >=0.63 || compareCatalog >=0.63){ //checks for difference in characters
+                words.push(data[i]);
+            }
+        }
+        if(words.length ==0){
+            res.send({message: "No matching search results"})
+        }
+        else{
+            res.send(words)
+        }
+        })
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

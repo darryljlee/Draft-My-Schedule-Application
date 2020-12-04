@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import {HttpClient} from '@angular/common/http'
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-manage-schedule',
@@ -8,7 +9,7 @@ import {HttpClient} from '@angular/common/http'
 })
 export class ManageScheduleComponent implements OnInit {
   schedules: any [];
-  constructor(private http: HttpClient) { 
+  constructor(private http: HttpClient, private route: Router) { 
     this.schedules=[];
   }
  
@@ -45,13 +46,43 @@ export class ManageScheduleComponent implements OnInit {
       }
     })
   }
+
+  makePublic(){
+    var publicSchedules = (<HTMLInputElement>document.getElementById('schedulesdropdown')).value;
+    var allPublicSchedules = {
+      scheduleToChange: publicSchedules
+    }
+    this.http.put<any>("http://localhost:3000/public", allPublicSchedules).subscribe(data =>{ //get request to get all the stored schedules and to append those existing names to the dropdown
+    if(data.message == "This schedule is now public"){
+      alert("This schedule is now public");
+    }
+  })
+  }
+
+  makePrivate(){
+    var privateSchedules = (<HTMLInputElement>document.getElementById('schedulesdropdown')).value;
+    var allPrivateSchedules = {
+      scheduleToChange: privateSchedules
+    }
+    this.http.put<any>("http://localhost:3000/private", allPrivateSchedules).subscribe(data =>{ //get request to get all the stored schedules and to append those existing names to the dropdown
+    if(data.message == "This schedule is now private"){
+      alert("This schedule is now private");
+    }
+  })
+  }
+
   //when webpage for manage schedules appears, populated the schedules dropdown with existing schedules names
   ngOnInit(): void {
-    this.http.get<any>("http://localhost:3000/api/schedules/getallschedules").subscribe(data =>{ //get request to get all the stored schedules and to append those existing names to the dropdown
+
+      if(localStorage.timetabletoken=="" || localStorage.timetabletoken==undefined){
+        this.route.navigate(['/home']);
+      }
+
+    this.http.get<any>("http://localhost:3000/api/schedules/getallschedules?schedToken="+localStorage.timetabletoken).subscribe(data =>{ //get request to get all the stored schedules and to append those existing names to the dropdown
       const allSchedules = document.getElementById("schedulesdropdown")
       for(let i =0; i<data.length; i++){
         var scheduleName = document.createElement("option");
-        var scheduleText = document.createTextNode(data[i].nameSched);
+        var scheduleText = document.createTextNode(data[i]);
         scheduleName.appendChild(scheduleText);
         allSchedules?.appendChild(scheduleName);
       } 

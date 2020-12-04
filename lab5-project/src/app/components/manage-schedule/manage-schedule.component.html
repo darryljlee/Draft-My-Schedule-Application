@@ -1,0 +1,57 @@
+<br>
+<nav>
+<a routerLink="/home" routerLinkActive="active">Home</a>
+<a routerLink="/createschedule" routerLinkActive="active">Create Schedule</a>
+<a routerLink="/manageschedule" routerLinkActive="active">Manage Schedule</a>
+</nav>
+      <br>
+
+        <div id="subject" class="subject">
+            <form>
+
+                <label for="schedulesdropdown">Your Schedules: </label>
+                <select name="schedulesdropdown" id="schedulesdropdown">
+                </select>
+               
+                <button type="button" (click)="displaySchedule()" >Display Schedule</button> <!--DONT CHANGE THIS YOU WILL HAVE PROBLEMS-->
+                <button type="button" (click)="deleteChosenSchedule()" >Delete Chosen Schedule</button>
+                <button type="button" (click)="deleteSchedules()" >Delete All Schedules</button>
+                <button type="button" (click)="makePublic()" >Make Schedule Public</button>
+                <button type="button" (click)="makePrivate()" >Make Schedule Private</button>
+              </form>
+        </div>       
+        
+
+
+        <div id=searchResults> </div>
+
+        <div *ngFor= "let schedule of schedules">           <!-- Makes for loop and for each course, it will create a table div-->
+          <h2>{{ schedule.className }}</h2>
+          <p>{{ schedule.catalog_description }}</p> 
+         
+          <table>
+            <tr>
+                <th>Section</th>
+                <th>Component</th>
+                <th>Class Number</th>
+                <th>Pre-requisites</th>
+                <th>Days</th>
+                <th>Time</th>
+                <th>Enrollment Status</th>
+
+              </tr>
+              <tr>
+                <td>{{ schedule.course_info[0].class_section }}</td>
+                <td class="{{ schedule.course_info[0].ssr_component }}">{{ schedule.course_info[0].ssr_component }}</td>
+                <td>{{ schedule.course_info[0].class_nbr }}</td>
+                <td>{{ schedule.course_info[0].descr }}</td>
+
+                <td>{{ schedule.course_info[0].days }}</td>
+                <td>{{ schedule.course_info[0].start_time }} to {{schedule.course_info[0].end_time}}</td>
+                <td>{{schedule.course_info[0].enrl_stat}}</td>
+              </tr>
+          </table>
+       </div>
+        
+        
+    

@@ -91,7 +91,6 @@ else if(userLogin.verification == "Deactivated"){
     return res.send({message: "Your account has been deactivated"})
 }
 
-//////////////////Pick up here after dinner
     encrypt.compare(loginPassword, userLogin.password, function(err, comparison){
         if(!err){
             if(comparison){
@@ -102,6 +101,7 @@ else if(userLogin.verification == "Deactivated"){
                     accessToken:accessToken,
                     refreshingToken:refreshToken,
                     username:userLogin.username,
+                    email: userLogin.email,
                     message:"you have been logged in"
                 })
             }
@@ -189,6 +189,18 @@ app.put('/api/reactivate' , (req,res) => {
     res.send({message: "Reactivated"})
 })
 
+app.put('/public', (req,res) => {
+ public = req.body.scheduleToChange; 
+publicSchedule = db.find('schedules').find({nameSched:Public}).assign({Visible: "Public"}).write();
+res.send({message: "This schedule is now public"})
+})
+
+app.put('/private', (req,res) => {
+    private = req.body.makePrivateSchedule; 
+    privateSchedule = db.find('schedules').find({nameSched:Public}).assign({Visible: "Private"}).write();
+    res.send({message: "This schedule is now private"})
+   })
+   
 
 app.get('/checkkeywords', (req,res) => {
         key = req.query.key.toUpperCase();
@@ -217,6 +229,9 @@ app.get('/showallusers', (req,res) => {
 }
 )
 
+// app.put('/updatepassword', (req,res)=> {
+
+// })
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -332,21 +347,40 @@ app.post('/api/schedules/createaschedule' , (req,res) => {    //input sanitizati
     const schema = joi.object({
         name: joi.string().max(20).min(1).regex(specialChars).required(),
         description: joi.string().max(20).regex(specialChars).required()
-
+        schedToken : joi.string().required()
     })
 
     const resultValid = schema.validate(req.query);
     if(resultValid.error){
-        res.status(400).send({message: "Bad query."})
+        res.status.send({message: "Bad query."})
         return;
     }*/
     storedData = req.query; 
+
+    // let userData = {};
+    // let schedToken= req.query.schedToken;
+    // try {
+    //     userData = jwt.verify(schedToken, AccessToken); //change AccessToken
+    // } catch(err) {
+    //     res.send("Not allowed");
+    //     return;
+    // }
+
+    let ownerOfSchedule = userLogin.username;
+    let ownerOfEmail = userLogin.email;
+    let counter = 0;
+    let listOfSched = db.get('schedules').value();
+    for(let i=0; i < listOfSched.length; i++){
+        if(listOfSched[i].email ==ownerOfEmail){
+            counter++;
+        }
+    }
  
-    if(db.get('schedules').find({nameSched:storedData.name}).value()){
+    if(db.get('schedules').find({nameSched:storedData.name, email:ownerOfEmail}).value()){
     return res.status(400).send({message:"You've already created a schedule of this name."});    
     }
     else{
-        db.get('schedules').push({nameSched:storedData.name,description: req.query.description, listOfCourses:[]}).write()
+        db.get('schedules').push({nameSched:storedData.name,description: req.query.description, visible:"Private", listOfCourses:[]}).write()
         return res.status(200).send(
             {message:"You have added a schedule"}
             )
@@ -505,7 +539,11 @@ res.send({
 else if (querySubjectName!="ALL SUBJECTS" && queryCourseNum != "" && queryComponent!="AllComponent"){ 
     let allStored = []; 
     for(i=0; i< data.length; i++){ //if else if is satisfied, then iterate through the json file and then push all matching search results into the array
-        if(querySubjectName==data[i].subject && queryCourseNum==data[i].catalog_nbr && queryComponent==data[i].course_info[0].ssr_component){
+        let checkOnly = data[i].catalog_nbr.toString();
+        if(!isNaN(queryCourseNum)) {
+        checkOnly = checkOnly.replace(/\D/g,'');
+        }       
+        if(querySubjectName==data[i].subject && queryCourseNum==checkOnly && queryComponent==data[i].course_info[0].ssr_component){
             allStored.push(data[i]);
         }
     }
@@ -515,7 +553,11 @@ else if (querySubjectName!="ALL SUBJECTS" && queryCourseNum != "" && queryCompon
 else if(querySubjectName!="ALL SUBJECTS" && queryCourseNum != "" && queryComponent=="AllComponent"){
     let allStored = [];
     for(i=0; i< data.length; i++){ //if else if is satisfied, then iterate through the json file and then push all matching search results into the array
-        if(querySubjectName==data[i].subject && queryCourseNum==data[i].catalog_nbr){
+        let checkOnly = data[i].catalog_nbr.toString();
+        if(!isNaN(queryCourseNum)) {
+        checkOnly = checkOnly.replace(/\D/g,'');
+        }   
+        if(querySubjectName==data[i].subject && queryCourseNum==checkOnly){
             allStored.push(data[i]);
         }
     }
@@ -526,17 +568,22 @@ else if(querySubjectName!="ALL SUBJECTS" && queryCourseNum != "" && queryCompone
 else if (querySubjectName!="ALL SUBJECTS" && queryCourseNum == "" && queryComponent=="AllComponent"){
 let allStored=[];
 for(i=0; i< data.length; i++){
-    if(querySubjectName==data[i].subject){
+    if(querySubjectName==checkOnly){
         allStored.push(data[i]);
     }
 }
+
 res.send(allStored)
 }
 //search by coursenum only
 else if (querySubjectName=="ALL SUBJECTS" && queryCourseNum != "" && queryComponent=="AllComponent"){
     let allStored = [];
     for(i=0; i< data.length; i++){
-        if(queryCourseNum==data[i].catalog_nbr){
+        let checkOnly = data[i].catalog_nbr.toString();
+        if(!isNaN(queryCourseNum)) {
+        checkOnly = checkOnly.replace(/\D/g,'');
+        }   
+        if(queryCourseNum==checkOnly){
             allStored.push(data[i]);
         }
     }

@@ -39,12 +39,15 @@ export class ManageScheduleComponent implements OnInit {
   //deleteChosenSchedule function that's called when the user clicks on "Delete Chosen Schedule"
   deleteChosenSchedule():void{
     var chosenSchedule = (<HTMLInputElement>document.getElementById('schedulesdropdown')).value; //store the value chosen in the existing schedules dropdown
-    this.http.delete<any>("http://localhost:3000/api/schedules/?name="+chosenSchedule).subscribe(data => { //delete request for a specified schedule name
-      if(data.message="the selected schedule has been deleted"){ //if message received from backend is the following, then show the alert saying that chosen schedule is deleted
+    var answer = window.confirm("Would you like to delete this schedule?")
+    if(answer){
+      this.http.delete<any>("http://localhost:3000/api/schedules/?name="+chosenSchedule).subscribe(data => { //delete request for a specified schedule name
+      //if(data.message="the selected schedule has been deleted"){ //if message received from backend is the following, then show the alert saying that chosen schedule is deleted
         alert("The schedule "+chosenSchedule+ " is now deleted.")
-        //location.reload(); //automatically reload page once schedule is deleted
-      }
+        //location.reload(); automatically reload page once schedule is deleted, may be deleted later
+      //}
     })
+    }
   }
 
   makePublic(){

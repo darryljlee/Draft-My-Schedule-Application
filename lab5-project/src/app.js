@@ -32,9 +32,6 @@ const ADMIN_TOKEN = "XjQ61FvPkqnaqQ3p3raz";
 const ACCESS_TOKEN = "n9rhIUzmXzQK08Nao8dZ";
 const REFRESH_TOKEN_SECRET = "SXSPh7lRk9gkURwZ1xiS";
 
-
-
-
 var storage = [];
 app.post('/login', async(req,res) => {
 const loginEmail = req.body.email;
@@ -51,6 +48,7 @@ if (resultValidation == null){
     return res.send({message: "Invalid email"});
 }
 
+//Administrator code
 const adminEmail = "scheduleAdmin@uwo.ca"
 const adminPassword = "lab5"
 
@@ -78,7 +76,7 @@ if(loginEmail == adminEmail && loginPassword==adminPassword){
         })
     }
 }
-
+//administrator code
 const userLogin = allUserInfo.get('all_users').find({email: loginEmail}).value();
 
 if(userLogin == null){
@@ -329,24 +327,26 @@ app.get('/api/courses/search/:subjectCode/:catalognum' , (req,res) => {
 
 
 //Q4 the backend functionality that allows user to enter the name of the schedule they want
-app.post('/api/schedules/createaschedule' , (req,res) => {
-    //input sanitization for the input of the name of the schedule
+app.post('/api/schedules/createaschedule' , (req,res) => {    //input sanitization. Potential room for error
+    /*
     const schema = joi.object({
-        name: joi.string().max(20).min(1).regex(specialChars).required()
+        name: joi.string().max(20).min(1).regex(specialChars).required(),
+        description: joi.string().max(20).regex(specialChars).required()
+
     })
 
     const resultValid = schema.validate(req.query);
     if(resultValid.error){
         res.status(400).send({message: "Bad query."})
         return;
-    }
+    }*/
     storedData = req.query; 
  
     if(db.get('schedules').find({nameSched:storedData.name}).value()){
     return res.status(400).send({message:"You've already created a schedule of this name."});    
     }
     else{
-        db.get('schedules').push({nameSched:storedData.name, listOfCourses:[]}).write()
+        db.get('schedules').push({nameSched:storedData.name,description: req.query.description, listOfCourses:[]}).write()
         return res.status(200).send(
             {message:"You have added a schedule"}
             )

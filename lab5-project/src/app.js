@@ -190,14 +190,14 @@ app.put('/api/reactivate' , (req,res) => {
 })
 
 app.put('/public', (req,res) => {
- public = req.body.scheduleToChange; 
-publicSchedule = db.find('schedules').find({nameSched:Public}).assign({Visible: "Public"}).write();
+//public = req.body.scheduleToChange; 
+publicSchedule = db.get('schedules').find({nameSched:req.body.scheduleToChange}).assign({visible: "Public"}).write();
 res.send({message: "This schedule is now public"})
 })
 
 app.put('/private', (req,res) => {
-    private = req.body.makePrivateSchedule; 
-    privateSchedule = db.find('schedules').find({nameSched:Public}).assign({Visible: "Private"}).write();
+   // private = req.body.makePrivateSchedule; 
+    privateSchedule = db.get('schedules').find({nameSched:req.body.scheduleToChange}).assign({visible: "Private"}).write();
     res.send({message: "This schedule is now private"})
    })
    
@@ -229,9 +229,28 @@ app.get('/showallusers', (req,res) => {
 }
 )
 
-// app.put('/updatepassword', (req,res)=> {
+app.put('/updatepassword', async(req,res)=> {
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////input sanitize here
+    console.log(req.body)
+    let userInfo = {};
+    let schedToken= req.body.schedToken;
+    try {
+        userInfo = jwt.verify(schedToken, ACCESS_TOKEN); //schedToken is encrypted user data, and access token is key to encrypted data. jwt.verify
+    } catch(err) {
+        res.send("An error occurred");
+        return;
+    }
 
-// })
+const hasher = await encrypt.genSalt();
+const protectedPassword = await encrypt.hash(req.body.password, hasher);
+if(allUserInfo.get("all_users").find({email: userInfo.email})){//find the user who made the update password request
+allUserInfo.get("all_users").find({email: userInfo.email}).assign({password:protectedPassword}).write();
+res.send({message: "Your password is now changed"})
+} 
+else{
+    res.send({message: "User cannot be found"})
+}
+})
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -343,45 +362,48 @@ app.get('/api/courses/search/:subjectCode/:catalognum' , (req,res) => {
 
 //Q4 the backend functionality that allows user to enter the name of the schedule they want
 app.post('/api/schedules/createaschedule' , (req,res) => {    //input sanitization. Potential room for error
-    /*
+    
     const schema = joi.object({
         name: joi.string().max(20).min(1).regex(specialChars).required(),
-        description: joi.string().max(20).regex(specialChars).required()
+        description: joi.string().max(20).regex(specialChars),
         schedToken : joi.string().required()
     })
 
     const resultValid = schema.validate(req.query);
     if(resultValid.error){
-        res.status.send({message: "Bad query."})
+        res.send({message: "Bad query."})
         return;
-    }*/
+    }
     storedData = req.query; 
 
-    // let userData = {};
-    // let schedToken= req.query.schedToken;
-    // try {
-    //     userData = jwt.verify(schedToken, AccessToken); //change AccessToken
-    // } catch(err) {
-    //     res.send("Not allowed");
-    //     return;
-    // }
+    let userInfo = {};
+    let schedToken= req.query.schedToken;
+    try {
+        userInfo = jwt.verify(schedToken, ACCESS_TOKEN); //change AccessToken
+    } catch(err) {
+        res.send("An error occurred");
+        return;
+    }
 
-    let ownerOfSchedule = userLogin.username;
-    let ownerOfEmail = userLogin.email;
+    //let ownerOfSchedule = userInfo.username;
+    //let ownerOfEmail = userInfo.email;
     let counter = 0;
     let listOfSched = db.get('schedules').value();
     for(let i=0; i < listOfSched.length; i++){
-        if(listOfSched[i].email ==ownerOfEmail){
+        if(listOfSched[i].email ==userInfo.email){
             counter++;
         }
     }
  
-    if(db.get('schedules').find({nameSched:storedData.name, email:ownerOfEmail}).value()){
-    return res.status(400).send({message:"You've already created a schedule of this name."});    
+    if(db.get('schedules').find({nameSched:req.query.name, email:userInfo.email}).value()){
+    return res.send({message:"You've already created a schedule of this name."});    
+    }
+    else if(counter ==20){
+        res.send({message:"The maximum number of schedules you can have is 20"})
     }
     else{
-        db.get('schedules').push({nameSched:storedData.name,description: req.query.description, visible:"Private", listOfCourses:[]}).write()
-        return res.status(200).send(
+        db.get('schedules').push({nameSched:req.query.name,description: req.query.description, email:userInfo.email, owner:userInfo.username, visible:"Private", listOfCourses:[]}).write()
+        return res.send(
             {message:"You have added a schedule"}
             )
     }
@@ -427,7 +449,7 @@ app.put('/api/schedules/updateCourse', (req,res) => {
     })
     const resultValid = queryschema.validate(req.query);
     if(resultValid.error){
-        res.status(400).send({message: "Bad message."})
+        res.send({message: "Bad message."})
         return;
     }
     const name = req.query.nameSched;
@@ -507,12 +529,38 @@ else{
 
 //Q8: this app get function is responsible for returning all the schedules stored inside the db.json
 app.get('/api/schedules/getallschedules', (req,res) => {
-let courses = [];
+let schema = joi.object({
+  schedToken: joi.string().required()
+ })
+let resultValid = schema.validate(req.query);
 
-courses = db.get('schedules').value();
-res.send(courses);
+if(resultValid.error){
+    res.send({message: "Bad request."})
+    return;
 }
-)
+//verify schedule token
+
+let userInfo = {};
+    let schedToken= req.query.schedToken;
+    try {
+        userInfo = jwt.verify(schedToken, ACCESS_TOKEN); //change AccessToken
+    } catch(err) {
+        res.send("An error occurred");
+        return;
+    }
+
+let userScheduleArray = [];
+let userReturnArray = [];
+
+userScheduleArray = db.get('schedules').value();
+
+for(let i=0; i<userScheduleArray.length; i++){
+    if(userScheduleArray[i].email == userInfo.email){
+        userReturnArray.push(userScheduleArray[i].nameSched)
+    }
+}
+res.send(userReturnArray);
+})
 //Q9: this app delete method is responsible for deleting all of the schedules stored inside the db.json file
 app.delete('/api/schedules/deleteall', (req,res) => {
 db.unset("schedules").write(); //deletes schedule array containing all saved schedules 
@@ -568,7 +616,7 @@ else if(querySubjectName!="ALL SUBJECTS" && queryCourseNum != "" && queryCompone
 else if (querySubjectName!="ALL SUBJECTS" && queryCourseNum == "" && queryComponent=="AllComponent"){
 let allStored=[];
 for(i=0; i< data.length; i++){
-    if(querySubjectName==checkOnly){
+    if(querySubjectName==data[i].subject){
         allStored.push(data[i]);
     }
 }

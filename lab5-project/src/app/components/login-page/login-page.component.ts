@@ -14,6 +14,7 @@ export class LoginPageComponent implements OnInit {
   email!: String;
   password!: String;
   verification!:String;
+  url = "http://localhost:3000/";
   constructor(private http:HttpClient, private route: Router) { }
   showVerifyButton:boolean = false;
 
@@ -23,10 +24,13 @@ export class LoginPageComponent implements OnInit {
       email: this.email,
       password: this.password
     }
-    this.http.post<any>('http://localhost:3000/login', accountInfo).subscribe(data=> {
-      console.log(data)
+    this.http.post<any>(this.url+"login", accountInfo).subscribe(data=> {
+     // console.log(data)
       if(data.message=="You didn't fill out all forms"){
         alert("You didn't fill out all forms")
+      }
+      else if (data.message=="Invalid email"){
+        alert("Invalid email")
       }
 
       else if(data.message=="You are an administrator"){
@@ -39,7 +43,7 @@ export class LoginPageComponent implements OnInit {
         alert("email not found")
       }
       else if(data.message=="Account inactive, contact support admin"){
-        alert("Account inactive, contact support admin")
+        alert("Account inactive, click the button to verify your account. Support scheduleAdmin@uwo.ca ")
         this.showVerifyButton = true;
       }
       else if(data.message=="Incorrect password"){
@@ -53,20 +57,21 @@ export class LoginPageComponent implements OnInit {
       }
       else if(data.message=="you have been logged in"){
         alert("you have been logged in")
-        localStorage.timetabletoken = data.accessToken;
+        localStorage.timetabletoken = data.accessToken; //create a local storage variable called "timetabletoken" and then set it equal to accessToken from app.js
+        localStorage.setItem("username", data.username)
+        localStorage.setItem("email", data.email)
+
         this.route.navigate(['/createschedule'])
       }
       else if(data.message=="Your account has been deactivated"){
         alert("Your account has been deactivated. Please contact support admin at scheduleAdmin@uwo.ca. ")
       }
-      /*
-      else if(data.message=="Your account has been deactivated"){ //reactivating account, leave here for now.
-        alert("Your account has been deactivated")
+      else if(data.message=="Your account has been deactivated"){
+        alert("Your account has been deactivated. Please contact support admin at scheduleAdmin@uwo.ca. ")
       }
-      */
+     
     })
   }
-
   verifiedEmail(){
     var verifiedInfo = {
       username:this.username,
@@ -74,7 +79,7 @@ export class LoginPageComponent implements OnInit {
       password: this.password,
       verification: this.verification
     }
-    this.http.put<any>("http://localhost:3000/verification", verifiedInfo).subscribe (data => {
+    this.http.put<any>(this.url+"verification", verifiedInfo).subscribe (data => {
       if(data.message == "This email is verified"){
         this.route.navigate(['/verified-email'])
       }

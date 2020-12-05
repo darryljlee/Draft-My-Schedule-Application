@@ -9,7 +9,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./settings.component.css']
 })
 export class SettingsComponent implements OnInit {
-
+  url = "http://localhost:3000/";
   constructor(private http: HttpClient, private route: Router) { }
 
   ngOnInit(): void {
@@ -18,7 +18,7 @@ export class SettingsComponent implements OnInit {
   changePassword(){
     const newPassword = (<HTMLInputElement>document.getElementById('password')).value;
     //call the backend for the result
-    this.http.put<any>("http://localhost:3000/updatepassword", {schedToken: localStorage.timetabletoken, password:newPassword}).subscribe(data=>{
+    this.http.put<any>(this.url+"updatepassword", {schedToken: localStorage.timetabletoken, password:newPassword}).subscribe(data=>{
     if(data.message){
       alert(data.message)
     }

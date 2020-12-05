@@ -9,7 +9,7 @@
 <br>
         <div id="subject" class="subject">
             <form>
-                <label for="Subject">Subject:</label>
+                <label for="Subject">Subject:   </label>
                 <select name="Subject" id="Subject">
                 <option value="ALL SUBJECTS">All Subjects</option>
 
@@ -20,7 +20,7 @@
                 <input name="CourseNumber" id="numberInput" type="text" maxlength="5">
                 <br><br>
               
-                <label for="Component">Component:</label>
+                <label for="Component">Component:      </label>
                 <select name="Component" id="Component"> 
                 <option value = "AllComponent"> All Components</option>
                 <option value = "LEC">Lecture</option>
@@ -33,7 +33,7 @@
                 <button type="button"  (click)="submitResults()">Submit</button> <!--DONT CHANGE THIS YOU WILL HAVE PROBLEMS-->
                 <br>
                 <br>
-                <label for="keyword">By Keyword</label>
+                <label for="keyword">By Keyword   </label>
                 <input name="keyword" id="keyword" type="text">
                 <br>
                 <br>
@@ -47,13 +47,10 @@
         </div>
 
         <div *ngFor= "let course of courses">           <!-- Makes for loop and for each course, it will create a div-->
-          <h2>{{course.subject}}</h2>
           <h2>{{ course.className }}</h2>
-          <h2>{{course.catalog_nbr}}</h2>
-
-          <button class="keyworddetails" (click)="keyworddetails(course.subject, course.catalog_nbr)">Expand</button>
-
-         
+          <h3>{{course.subject}}</h3>
+          <h3>{{course.catalog_nbr}}</h3>
+        
           <table>
             <tr>
                 <th>Section</th>
@@ -73,8 +70,12 @@
                 <td>{{ course.course_info[0].days }}</td>
                 <td>{{ course.course_info[0].start_time }} to {{course.course_info[0].end_time}}</td>
               </tr>
+
+              <tr> </tr>
           </table>
-       </div>
+          <button class="keyworddetails" (click)="keyworddetails(course.subject, course.catalog_nbr)">Expand</button>
+         
+        </div>
         
    
 

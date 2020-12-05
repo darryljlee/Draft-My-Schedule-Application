@@ -28,6 +28,10 @@ allUserInfo.defaults({ all_users: [] }).write()
 app.use(cors());
 const similarity = require('string-similarity')
 
+const adapter_2 = new FileSync('reviews.json') 
+const reviews = low (adapter_2)
+reviews.defaults({reviews:[]}).write()
+
 const ADMIN_TOKEN = "XjQ61FvPkqnaqQ3p3raz";
 const ACCESS_TOKEN = "n9rhIUzmXzQK08Nao8dZ";
 const REFRESH_TOKEN_SECRET = "SXSPh7lRk9gkURwZ1xiS";
@@ -44,7 +48,7 @@ if(!loginEmail||!loginPassword){
 
 const resultValidation = validateIncomingEmail(loginEmail);
 
-if (resultValidation == null){
+if (!resultValidation){
     return res.send({message: "Invalid email"});
 }
 
@@ -230,7 +234,7 @@ app.get('/showallusers', (req,res) => {
 )
 
 app.put('/updatepassword', async(req,res)=> {
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////input sanitize here
+ 
     console.log(req.body)
     let userInfo = {};
     let schedToken= req.body.schedToken;
@@ -250,6 +254,21 @@ res.send({message: "Your password is now changed"})
 else{
     res.send({message: "User cannot be found"})
 }
+})
+
+
+
+app.put('/addreview', (req,res) => {
+    const review = { //declare the following 
+        username: req.body.username,
+        courseName: req.body.courseName,
+        courseSubject: req.body.courseSubject,
+        courseID : req.body.courseID,
+        dateCreated : req.body.dateCreated,
+        theTypedReview : req.body.theTypedReview
+    }
+    reviews.get('reviews').push(review).write()
+    res.send({message: "Review has been added"});
 })
 
 
@@ -303,23 +322,7 @@ app.get('/api/courses/search/:subjectCode' , (req,res) => {
     } 
 }
 )
-//new for lab 5
-app.get('/api/courses/searchnum/:catalognum' , (req,res) => {
-    const catalognum = req.params.catalognum.toUpperCase(); 
-    let numArray = [];
-    for (i=0; i< data.length; i++){
-        if(catalognum ==data[i].catalog_nbr){
-            numArray.push(data[i])
-        }
-    }
-    if(numArray.length <= 0){
-        res.send("couldn't find matching searches for your catalog number")
-    }
-    else{
-        res.send(numArray);
-    } 
-}
-)
+
 
 //Item 3: get request for an inputted subject name and catalog number and an optional component
 app.get('/api/courses/search/:subjectCode/:catalognum' , (req,res) => {
@@ -363,13 +366,13 @@ app.get('/api/courses/search/:subjectCode/:catalognum' , (req,res) => {
 //Q4 the backend functionality that allows user to enter the name of the schedule they want
 app.post('/api/schedules/createaschedule' , (req,res) => {    //input sanitization. Potential room for error
     
-    const schema = joi.object({
+    const sanitize = joi.object({
         name: joi.string().max(20).min(1).regex(specialChars).required(),
         description: joi.string().max(20).regex(specialChars),
         schedToken : joi.string().required()
     })
 
-    const resultValid = schema.validate(req.query);
+    const resultValid = sanitize.validate(req.query);
     if(resultValid.error){
         res.send({message: "Bad query."})
         return;
@@ -402,7 +405,7 @@ app.post('/api/schedules/createaschedule' , (req,res) => {    //input sanitizati
         res.send({message:"The maximum number of schedules you can have is 20"})
     }
     else{
-        db.get('schedules').push({nameSched:req.query.name,description: req.query.description, email:userInfo.email, owner:userInfo.username, visible:"Private", listOfCourses:[]}).write()
+        db.get('schedules').push({nameSched:req.query.name,description: req.query.description, owner:userInfo.username, email:userInfo.email, visible:"Private", listOfCourses:[]}).write()
         return res.send(
             {message:"You have added a schedule"}
             )

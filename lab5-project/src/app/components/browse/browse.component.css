@@ -1,0 +1,20 @@
+table{
+    border-collapse: collapse;
+    text-align: center;
+    }
+    
+    td, th {
+    border: 1px solid black;
+    text-align: center;
+    
+    }
+    
+    .addButton{
+        height: 30px;
+        line-height: 10px;
+        width: 50px;
+        font-size: 20px;
+        background-color: aquamarine;
+        float: right;
+        text-align: center;
+    }

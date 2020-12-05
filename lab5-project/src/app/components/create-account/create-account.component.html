@@ -1,16 +1,25 @@
-
+<nav>
+    <a routerLink="/home" routerLinkActive="active">Home</a>
+    <a routerLink="/browse" routerLinkActive="active">Browse</a>
+    <a routerLink="/createaccount" routerLinkActive="active">Create Account</a>
+</nav>
 <br>
 <br>
 <h2>Create your account:</h2>
 
-<label for="email">Email:  </label>
-<input name="email" type="email" id="email" pattern=".+@uwo.ca" maxlength="12" required>
+<label for="username">Username:  </label>
+<input [(ngModel)]="username" name="username" id="username" type="text">
+<br>
+<label for="email" id="labelemail">Email:  </label>
+<input [(ngModel)]="email"name="email" type="email" id="email" placeholder="Enter an email here" required>
 <br>
 <label for="password">Password:  </label>
-<input name="password" id="password" type="text">
+<input [(ngModel)]="password" name="password" id="password" type="password">
 <br>
-<label for="username">Username:  </label>
-<input name="username" id="username" type="text">
-<button type="button" >Create Account</button>
+<button id="createaccount" type="button" (click)=createAccount() >Create Account</button>
+
+
+
+<button *ngIf = "showVerifyButton" (click)="verifiedEmail()">Click this button to verify email</button>
 
 

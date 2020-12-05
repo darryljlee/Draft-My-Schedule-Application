@@ -3,9 +3,11 @@
     <a routerLink="/home" routerLinkActive="active">Home</a>
     <a routerLink="/createschedule" routerLinkActive="active">Create Schedule</a>
     <a routerLink="/manageschedule" routerLinkActive="active">Manage Schedule</a>
+    <a routerLink="/settings" routerLinkActive="active">Account Settings</a>
+    <a (click)="logout()"routerLink="/home" routerLinkActive="active">Logout</a>
 
-       
-</nav>    
+    
+</nav> 
   <br>
   <br>
         <div id="subject" class="subject">
@@ -16,11 +18,6 @@
                 <input name="description" id="description" type="text" placeholder="Type a description here">
                 <button type="button" (click)="createSchedule()" >Create Schedule</button> <!--DONT CHANGE THIS YOU WILL HAVE PROBLEMS-->
                 <br><br>
-
-            
-               
-
-
                 <label for="Subject">Subject:</label>
                 <select name="Subject" id="Subject">
                 <option value="ALL SUBJECTS">All Subjects</option>
@@ -83,6 +80,10 @@
                 <td>{{ course.course_info[0].start_time }} to {{course.course_info[0].end_time}}</td>
                 <td>{{course.course_info[0].enrl_stat}}</td>
               </tr>
+
+              <label for="createreview">Create a review here:</label>
+                <input name="createreview" id="createreview" type="text" placeholder="Type something here">
+                <button type="button" (click)="createreview(course.subject, course.catalog_nbr, course.className)" >Post review</button> <!--DONT CHANGE THIS YOU WILL HAVE PROBLEMS-->
           </table>
        </div>
         

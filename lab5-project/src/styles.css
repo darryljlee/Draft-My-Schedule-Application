@@ -2,11 +2,20 @@ h1 {
     color: rgb(120, 1, 156); 
     font-family: Arial, Helvetica, sans-serif;   
     font-size: 250%;
+    text-align: center;
   }
+nav{
+  left: 0px;
+  height: 40px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
   h2, h3 { 
     color: #444;
     font-family: Arial, Helvetica, sans-serif;   
     font-weight: lighter;
+    
   }
   body { 
     margin: 2em; 
@@ -27,6 +36,7 @@ h1 {
     border-radius: 4px;
     cursor: pointer;
     cursor: hand;
+    position: center;
   }
   button:hover {
     background-color: #cfd8dc;
@@ -45,6 +55,7 @@ h1 {
     display: inline-block;
     background-color: #eee;
     border-radius: 4px;
+    text-align: center;
   }
   nav a:visited, a:link {
     color: #607D8B;

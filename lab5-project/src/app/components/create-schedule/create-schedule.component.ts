@@ -20,7 +20,7 @@ export class CreateScheduleComponent implements OnInit {
   }
 
   putIntoSchedule = [];
-//createSchedule functon that's called when user clicks on "create schedule button"
+  //createSchedule functon that's called when user clicks on "create schedule button"
   createSchedule():void{
     var nameInput = (<HTMLInputElement>document.getElementById('newschedule')).value;
     var descInput = (<HTMLInputElement>document.getElementById('description')).value;
@@ -31,7 +31,7 @@ export class CreateScheduleComponent implements OnInit {
     if(descInput==""){
     this.http.post<any>(this.url+"api/schedules/createaschedule?name="+nameInput+"&schedToken="+localStorage.timetabletoken,"").subscribe(data=>{
       alert (data.message);
-      //location.reload;
+      location.reload();
     })
     }
     else{
@@ -49,7 +49,7 @@ export class CreateScheduleComponent implements OnInit {
   addCourseToSchedule(subject:String, courseNumber:String){ //function that's called when the [+] button is clicked next to a course
     var nameOfSchedule = (<HTMLInputElement>document.getElementById('schedulesdropdown')).value;
     this.http.put<any>(this.url+"api/schedules/updateCourse?nameSched="+nameOfSchedule+ "&subject="+subject+"&courseNumber="+courseNumber, nameOfSchedule).subscribe(data =>{
-      alert("You've created a nice name for your schedule. The schedule name you've created is "+nameOfSchedule)
+      //alert("You've created a nice name for your schedule. The schedule name you've created is "+nameOfSchedule)
   }
   )
   }
@@ -79,9 +79,6 @@ export class CreateScheduleComponent implements OnInit {
   }
   })}
 
-  logout(){
-    localStorage.timetabletoken="";
-  }
   
   ngOnInit(): void {
     
@@ -137,4 +134,13 @@ export class CreateScheduleComponent implements OnInit {
     alert("Your review has been added!")
     })
   }
+
+  logout(){
+    localStorage.removeItem("timetabletoken")
+    localStorage.removeItem("username")
+    localStorage.removeItem("email")
+    this.route.navigate(['/home'])
+  }
+
+
 }

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
+
 //
 @Component({
   selector: 'app-create-schedule',
@@ -9,6 +10,7 @@ import { HttpClient } from '@angular/common/http';
 })
 export class BrowseComponent implements OnInit {
   specialChars = /^[^<>:/?#@!&;]*$/;
+  url = "http://localhost:3000/";
   constructor(private http: HttpClient) { 
     this.courses = []
   }
@@ -22,7 +24,7 @@ export class BrowseComponent implements OnInit {
       alert("Invalid input! Try not to enter special characters") //check if any special characters are entered inside the form
       return;
     }
-    this.http.post<any>("http://localhost:3000/api/schedules/createaschedule?name="+nameInput, nameInput).subscribe(data =>{ //make a post request to create a schedule when user enters Create Schedule
+    this.http.post<any>(this.url+"api/schedules/createaschedule?name="+nameInput, nameInput).subscribe(data =>{ //make a post request to create a schedule when user enters Create Schedule
       alert("You've created a nice name for your schedule. The schedule name you've created is "+nameInput) //show alert to confirm creation of schedule and the name they've selected
       //location.reload(); //allow the page to reload with updated changes once the schedule has been created
     }
@@ -30,7 +32,7 @@ export class BrowseComponent implements OnInit {
   }
   addCourseToSchedule(subject:String, courseNumber:String){ //function that's called when the [+] button is clicked next to a course
     var nameOfSchedule = (<HTMLInputElement>document.getElementById('schedulesdropdown')).value;
-    this.http.put<any>("http://localhost:3000/api/schedules/updateCourse?nameSched="+nameOfSchedule+ "&subject="+subject+"&courseNumber="+courseNumber, nameOfSchedule).subscribe(data =>{
+    this.http.put<any>(this.url+"api/schedules/updateCourse?nameSched="+nameOfSchedule+ "&subject="+subject+"&courseNumber="+courseNumber, nameOfSchedule).subscribe(data =>{
       alert("You've created a nice name for your schedule. The schedule name you've created is "+nameOfSchedule)
   }
   )
@@ -42,7 +44,7 @@ export class BrowseComponent implements OnInit {
     var subjectChoice = (<HTMLInputElement>document.getElementById("Subject")).value; //create a variable that will link the subject choice to submit button  
     var numberChoice = (<HTMLInputElement>document.getElementById("numberInput")).value;
     var componentChoice = (<HTMLInputElement>document.getElementById("Component")).value;
-    var submitRequest = "http://localhost:3000/api/courses/submit?" +"Subject=" + subjectChoice + "&CourseNumber=" + numberChoice + "&Component=" + componentChoice; 
+    var submitRequest = this.url+"api/courses/submit?" +"Subject=" + subjectChoice + "&CourseNumber=" + numberChoice + "&Component=" + componentChoice; 
   
     
   this.http.get<any>(submitRequest).subscribe((data: any) => {
@@ -61,18 +63,18 @@ export class BrowseComponent implements OnInit {
 
   searchByKeyword(){
     var keywordInput = (<HTMLInputElement>document.getElementById("keyword")).value;
-    var keywordQuery = '/checkkeywords?key='+keywordInput;
-    this.http.get<any>("http://localhost:3000"+keywordQuery).subscribe(data => {
-      if(data.length == undefined){
-        alert(data.message);
-        return;
-      }
+    var keywordQuery = 'checkkeywords?key='+keywordInput;
+    if(keywordInput.length == undefined || keywordInput.length<4 ){
+      alert("Please enter 4 characters or more.");
+      return;
+    }
+    this.http.get<any>(this.url+keywordQuery).subscribe(data => {      
       this.courses=data;
     })
   }
 
   keyworddetails(subject:String, catalog_nbr:String){
-    this.http.get<any>("http://localhost:3000/api/courses/search/"+subject+"/"+catalog_nbr).subscribe(data => {
+    this.http.get<any>(this.url+"api/courses/search/"+subject+"/"+catalog_nbr).subscribe(data => {
     let displayedKeywordString = "";       //Alert string to be displayed
 
     displayedKeywordString += data.subject + " " + data.catalog_nbr + "\r\n";
@@ -95,7 +97,7 @@ export class BrowseComponent implements OnInit {
   ngOnInit(): void {
     /*The following get request is used to get all the subject names to populate the form for Subject, and to remove duplicates when
     receiving from the JSON file */
-    this.http.get<any>("http://localhost:3000/api/courses").subscribe(data => { 
+    this.http.get<any>(this.url+"api/courses").subscribe(data => { 
       var getSubjects = document.getElementById("Subject"); 
         //remove the duplicates found in the json file for all the subjects, if a duplicate is found, skip it and go to the next index
         let tempArray = [];
@@ -119,7 +121,7 @@ export class BrowseComponent implements OnInit {
     })
 
     //get request to populate the schedules dropdown to show all existing schedules 
-    this.http.get<any>("http://localhost:3000/api/schedules/getallschedules").subscribe(data =>{ 
+    this.http.get<any>(this.url+"api/schedules/getallschedules").subscribe(data =>{ 
       const allSchedules = document.getElementById("schedulesdropdown")
       for(let i =0; i<data.length; i++){ //
         var scheduleName = document.createElement("option");
